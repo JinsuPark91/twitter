@@ -1,46 +1,12 @@
 import { useState } from 'react'
-import { styled } from 'styled-components'
 import { auth } from '../firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { useNavigate } from 'react-router-dom'
-const Wrapper = styled.div`
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 420px;
-    padding: 50px 0px;
-`
+import { FirebaseError } from 'firebase/app';
+import { Link, useNavigate } from 'react-router-dom'
+import { Form, Input, Switcher, Title, Wrapper, Error } from '../components/auth-components';
+import GithubButton from '../components/github-button';
+import GoogleButton from '../components/google-button';
 
-const Form = styled.form`
-    margin-top: 50px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-`
-const Input = styled.input`
-    padding: 10px 20px;
-    border-radius: 50px;
-    border: none;
-    width: 100%;
-    font-size: 16px;
-    &[type="submit"]{
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
-    }
-`
-const Title = styled.h1`
-    font-size:  42px;
-`;
-
-const Error = styled.span`
-    font-weight : 600;
-    color: tomato;
-
-`
 
 export default function CreateAccount() {
     const navigate = useNavigate();
@@ -79,15 +45,15 @@ export default function CreateAccount() {
 
         } catch (e) {
             // set error
+            if (e instanceof FirebaseError) {
+                console.log(e.code, e.message);
+                setError(e.message)
+            }
 
         } finally {
             setIsLoading(false)
         };
 
-        // create an account
-        // set the name of the user
-        // redirect to the home page
-        console.log(name, email, password)
     }
 
     return <Wrapper>
@@ -98,6 +64,12 @@ export default function CreateAccount() {
             <Input onChange={onChange} name="password" value={password} placeholder='password' type='password' required />
             <Input type="submit" value={isLoading ? "is loading...." : "Create Account"} />
         </Form>
-        {error !== "" ? <Error></Error> : null}
+        {error !== "" ? <Error>{error}</Error> : null}
+        <Switcher>
+            Already have an account? {" "}
+            <Link to="/login">log in &rarr;</Link>
+        </Switcher>
+        <GithubButton></GithubButton>
+        <GoogleButton></GoogleButton>
     </Wrapper>
 }
